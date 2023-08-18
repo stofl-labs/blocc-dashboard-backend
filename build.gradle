@@ -23,6 +23,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:postgresql:1.18.+'
     compileOnly 'io.grpc:grpc-api:1.54.1'
     runtimeOnly 'io.grpc:grpc-netty-shaded:1.54.1'
 }
