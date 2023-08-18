@@ -1,17 +1,19 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtempreading;
+package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
 
 import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.ac.ic.doc.blocc.dashboard.approvedtempreading.model.ApprovedTransaction;
-import uk.ac.ic.doc.blocc.dashboard.approvedtempreading.model.TemperatureHumidityReading;
+import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTransaction;
+import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
 @Configuration
 public class ApprovedTransactionConfiguration {
+
   @Bean
   CommandLineRunner commandLineRunner(ApprovedTransactionRepository repository) {
     return args -> {
+
       ApprovedTransaction tx1 = new ApprovedTransaction(
           "tx123",
           1, List.of("Container5MSP", "Container6MSP"),
@@ -30,4 +32,5 @@ public class ApprovedTransactionConfiguration {
       repository.saveAll(List.of(tx1, tx2, tx3));
     };
   }
+
 }

@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtempreading.model;
+package uk.ac.ic.doc.blocc.dashboard.fabric.model;
 
 import jakarta.persistence.Embeddable;
 

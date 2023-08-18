@@ -1,22 +1,22 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtempreading;
+package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.ac.ic.doc.blocc.dashboard.approvedtempreading.model.ApprovedTempReading;
-import uk.ac.ic.doc.blocc.dashboard.approvedtempreading.model.ApprovedTransaction;
+import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTempReading;
+import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTransaction;
 
 @Service
-public class ApprovedTempReadingService {
+public class ApprovedTransactionService {
 
   private final ApprovedTransactionRepository repository;
 
   @Autowired
-  public ApprovedTempReadingService(ApprovedTransactionRepository repository) {
+  public ApprovedTransactionService(ApprovedTransactionRepository repository) {
     this.repository = repository;
   }
 
-  public List<ApprovedTempReading> getApprovedTransactions(int containerNum) {
+  public List<ApprovedTempReading> getApprovedTempReadings(int containerNum) {
     List<ApprovedTransaction> allApprovedTransactions =
         repository.findAllByContainerNum(containerNum);
 

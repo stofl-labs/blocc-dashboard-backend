@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtempreading.model;
+package uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
+import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
 @Entity
 @Table
