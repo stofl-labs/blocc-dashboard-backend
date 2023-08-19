@@ -107,4 +107,47 @@ public class ApprovedTransactionServiceTest {
     assertEquals(String.format("Transaction %s exists", txId), exception.getMessage());
   }
 
+  @Test
+  public void addsSensorChaincodeTransactionWithReading() {
+    TemperatureHumidityReading reading = new TemperatureHumidityReading(30, 0.9F, 300L);
+    approvedTransactionService.addTempReading("tx6789", 1, reading);
+
+    // Create an ArgumentCaptor for ApprovedTransaction
+    ArgumentCaptor<ApprovedTransaction> captor = ArgumentCaptor.forClass(ApprovedTransaction.class);
+
+    verify(repository, times(1)).save(captor.capture());
+
+    // Retrieve the captured argument
+    ApprovedTransaction capturedTransaction = captor.getValue();
+
+    // Now you can assert on the properties of the captured ApprovedTransaction
+    assertEquals("tx6789", capturedTransaction.getTxId());
+    assertEquals(1, capturedTransaction.getContainerNum());
+    assertEquals(30, capturedTransaction.getReading().getTemperature());
+    assertEquals(0.9F, capturedTransaction.getReading().getRelativeHumidity());
+    assertEquals(300L, capturedTransaction.getReading().getTimestamp());
+  }
+
+  @Test
+  public void throwsExceptionWhenSavingReadingObjectToExistedTransaction() {
+    // Given
+    String txId = "tx6789";
+    TemperatureHumidityReading reading = new TemperatureHumidityReading(
+        30, 0.9F, 300L);
+
+    int containerNum = 1;
+
+    // Mock the repository to return an Optional containing a transaction when findById is called
+    when(repository.findById(txId)).thenReturn(Optional.of(new ApprovedTransaction()));
+
+    // When & Then
+    IllegalArgumentException exception = assertThrows(
+        IllegalArgumentException.class,
+        () -> approvedTransactionService.addTempReading(txId, containerNum, reading)
+    );
+
+    // Assert the exception message
+    assertEquals(String.format("Transaction %s exists", txId), exception.getMessage());
+  }
+
 }

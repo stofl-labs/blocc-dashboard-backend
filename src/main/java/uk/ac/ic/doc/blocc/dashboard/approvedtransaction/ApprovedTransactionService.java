@@ -38,4 +38,12 @@ public class ApprovedTransactionService {
     repository.save(new ApprovedTransaction(txId, containerNum,
         new TemperatureHumidityReading(temperature, relativeHumidity, timestamp)));
   }
+
+  public void addTempReading(String txId, int containerNum, TemperatureHumidityReading reading) {
+    if (repository.findById(txId).isPresent()) {
+      throw new IllegalArgumentException(String.format("Transaction %s exists", txId));
+    }
+
+    repository.save(new ApprovedTransaction(txId, containerNum, reading));
+  }
 }
