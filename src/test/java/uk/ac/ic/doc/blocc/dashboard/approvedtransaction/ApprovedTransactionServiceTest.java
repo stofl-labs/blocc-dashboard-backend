@@ -3,6 +3,7 @@ package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -192,6 +193,34 @@ public class ApprovedTransactionServiceTest {
 
     assertEquals(String.format("Transaction %s for container %d is not found", txId, containerNum),
         exception.getMessage());
+  }
+
+  @Test
+  public void transactionRollbacksWhenApprovingAlreadyApprovedTransaction() {
+    // Given
+    String txId = "12345";
+    int containerNum = 1;
+    String approvingMspId = "Container5MSP";
+    ApprovedTransaction approvedTransaction =
+        new ApprovedTransaction(txId, containerNum,
+            new TemperatureHumidityReading());
+
+    // Mock the repository to return the transaction
+    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(
+        Optional.of(approvedTransaction));
+
+    // Mock the transaction to already have the approvingMspId
+    approvedTransaction.approve(approvingMspId);
+
+    // When & Then
+    Exception exception = assertThrows(IllegalArgumentException.class,
+        () -> approvedTransactionService.approveTransaction(txId, containerNum, approvingMspId));
+
+    assertEquals(String.format("%s has already approved this transaction", approvingMspId),
+        exception.getMessage());
+
+    // Verify that the repository's save method was never called, indicating a rollback
+    verify(repository, times(0)).save(any(ApprovedTransaction.class));
   }
 
 }

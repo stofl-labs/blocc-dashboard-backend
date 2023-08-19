@@ -1,7 +1,10 @@
 package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTempReading;
@@ -13,6 +16,9 @@ import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 public class ApprovedTransactionService {
 
   private final ApprovedTransactionRepository repository;
+
+  private static final Logger logger =
+      LoggerFactory.getLogger(ApprovedTransactionService.class);
 
   @Autowired
   public ApprovedTransactionService(ApprovedTransactionRepository repository) {
@@ -50,14 +56,19 @@ public class ApprovedTransactionService {
     repository.save(new ApprovedTransaction(txId, containerNum, reading));
   }
 
+  @Transactional
   public void approveTransaction(String txId, int containerNum, String approvingMspId) {
+    logger.info("{} is approving Transaction {} for container {}", approvingMspId, txId,
+        containerNum);
     Optional<ApprovedTransaction> possibleTx =
         repository.findById(new CompositeKey(txId, containerNum));
     if (possibleTx.isEmpty()) {
-      throw new IllegalArgumentException(
-          String.format("Transaction %s for container %d is not found", txId, containerNum));
+      String msg =
+          String.format("Transaction %s for container %d is not found", txId, containerNum);
+      logger.error(msg);
+      throw new IllegalArgumentException(msg);
     }
-
+    
     ApprovedTransaction approvedTransaction = possibleTx.get();
     approvedTransaction.approve(approvingMspId);
 
