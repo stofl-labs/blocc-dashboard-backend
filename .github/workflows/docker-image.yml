@@ -20,6 +20,13 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+
+    - name: Setup PostgreSQL
+      uses: Harmon758/postgresql-action@v1.0.0
+      with:
+        postgresql db: blocc-dashboard
+        postgresql user: blocc-dashboard-backend
+        postgresql password: blocc-dashboard-backend-db 
         
     - uses: gradle/wrapper-validation-action@v1
     
