@@ -24,6 +24,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework:spring-test:6.0.11'
     testImplementation 'org.testcontainers:postgresql:1.18.+'
     compileOnly 'io.grpc:grpc-api:1.54.1'
     runtimeOnly 'io.grpc:grpc-netty-shaded:1.54.1'
@@ -41,7 +42,8 @@ jacocoTestReport {
             fileTree(dir: it,
                     exclude: [
                             'uk/ac/ic/doc/blocc/dashboard/fabric/**',
-                            'uk/ac/ic/doc/blocc/dashboard/BloccDashboardApplication.class'
+                            'uk/ac/ic/doc/blocc/dashboard/BloccDashboardApplication.class',
+                            'uk/ac/ic/doc/blocc/dashboard/approvedtransaction/ApprovedTransactionConfiguration.class'
                     ])
         }))
     }

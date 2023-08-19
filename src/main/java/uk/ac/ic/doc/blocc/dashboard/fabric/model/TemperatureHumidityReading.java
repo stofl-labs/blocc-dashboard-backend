@@ -1,9 +1,11 @@
 package uk.ac.ic.doc.blocc.dashboard.fabric.model;
 
 import jakarta.persistence.Embeddable;
+import java.time.Instant;
 
 @Embeddable
 public class TemperatureHumidityReading {
+
   private float temperature;
   private float relativeHumidity;
   private long timestamp;
@@ -40,5 +42,12 @@ public class TemperatureHumidityReading {
 
   public float getTemperature() {
     return temperature;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Temperature=%f, Relative Humidity=%f, Time=%s", temperature,
+        relativeHumidity,
+        Instant.ofEpochSecond(timestamp).toString());
   }
 }
