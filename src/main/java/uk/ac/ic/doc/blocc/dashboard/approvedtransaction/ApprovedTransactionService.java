@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTempReading;
 import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTransaction;
+import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.CompositeKey;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
 @Service
@@ -32,7 +33,7 @@ public class ApprovedTransactionService {
   public void addTempReading(String txId, int containerNum, float temperature,
                              float relativeHumidity,
                              long timestamp) {
-    if (repository.findById(txId).isPresent()) {
+    if (repository.findById(new CompositeKey(txId, containerNum)).isPresent()) {
       throw new IllegalArgumentException(String.format("Transaction %s exists", txId));
     }
 
@@ -41,17 +42,20 @@ public class ApprovedTransactionService {
   }
 
   public void addTempReading(String txId, int containerNum, TemperatureHumidityReading reading) {
-    if (repository.findById(txId).isPresent()) {
-      throw new IllegalArgumentException(String.format("Transaction %s exists", txId));
+    if (repository.findById(new CompositeKey(txId, containerNum)).isPresent()) {
+      throw new IllegalArgumentException(
+          String.format("Transaction %s for container %d exists", txId, containerNum));
     }
 
     repository.save(new ApprovedTransaction(txId, containerNum, reading));
   }
 
-  public void approveTransaction(String txId, String approvingMspId) {
-    Optional<ApprovedTransaction> possibleTx = repository.findById(txId);
+  public void approveTransaction(String txId, int containerNum, String approvingMspId) {
+    Optional<ApprovedTransaction> possibleTx =
+        repository.findById(new CompositeKey(txId, containerNum));
     if (possibleTx.isEmpty()) {
-      throw new IllegalArgumentException(String.format("Transaction %s not found", txId));
+      throw new IllegalArgumentException(
+          String.format("Transaction %s for container %d is not found", txId, containerNum));
     }
 
     ApprovedTransaction approvedTransaction = possibleTx.get();

@@ -2,8 +2,8 @@ package uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +13,8 @@ import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 @Table
 public class ApprovedTransaction {
 
-  @Id
-  private String txId;
-
-  private int containerNum;
+  @EmbeddedId
+  private CompositeKey key;
 
   @ElementCollection
   @CollectionTable
@@ -25,16 +23,14 @@ public class ApprovedTransaction {
 
   public ApprovedTransaction(String txId, int containerNum, List<String> approvingMspIds,
                              TemperatureHumidityReading reading) {
-    this.txId = txId;
-    this.containerNum = containerNum;
+    key = new CompositeKey(txId, containerNum);
     this.approvingMspIds = approvingMspIds;
     this.reading = reading;
   }
 
   public ApprovedTransaction(String txId, int containerNum,
                              TemperatureHumidityReading reading) {
-    this.txId = txId;
-    this.containerNum = containerNum;
+    key = new CompositeKey(txId, containerNum);
     this.reading = reading;
   }
 
@@ -43,7 +39,7 @@ public class ApprovedTransaction {
 
 
   public String getTxId() {
-    return txId;
+    return key.getTxId();
   }
 
   public List<String> getApprovingMspIds() {
@@ -59,7 +55,7 @@ public class ApprovedTransaction {
   }
 
   public int getContainerNum() {
-    return containerNum;
+    return key.getContainerNum();
   }
 
   public void approve(String approvingMspId) {

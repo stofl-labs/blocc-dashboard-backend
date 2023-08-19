@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTempReading;
 import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTransaction;
+import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.CompositeKey;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
 public class ApprovedTransactionServiceTest {
@@ -95,7 +96,8 @@ public class ApprovedTransactionServiceTest {
     long timestamp = 300L;
 
     // Mock the repository to return an Optional containing a transaction when findById is called
-    when(repository.findById(txId)).thenReturn(Optional.of(new ApprovedTransaction()));
+    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(
+        Optional.of(new ApprovedTransaction()));
 
     // When & Then
     IllegalArgumentException exception = assertThrows(
@@ -139,7 +141,8 @@ public class ApprovedTransactionServiceTest {
     int containerNum = 1;
 
     // Mock the repository to return an Optional containing a transaction when findById is called
-    when(repository.findById(txId)).thenReturn(Optional.of(new ApprovedTransaction()));
+    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(
+        Optional.of(new ApprovedTransaction()));
 
     // When & Then
     IllegalArgumentException exception = assertThrows(
@@ -148,22 +151,25 @@ public class ApprovedTransactionServiceTest {
     );
 
     // Assert the exception message
-    assertEquals(String.format("Transaction %s exists", txId), exception.getMessage());
+    assertEquals(String.format("Transaction %s for container %d exists", txId, containerNum),
+        exception.getMessage());
   }
 
   @Test
-  public void testApproveTransaction_Success() {
+  public void approvesExistingTransaction() {
     // Given
     String txId = "12345";
+    int containerNum = 1;
     String approvingMspId = "Container5MSP";
     ApprovedTransaction approvedTransaction =
         new ApprovedTransaction(txId, 1,
             new TemperatureHumidityReading()); // Assuming there's a default constructor or use another appropriate constructor
 
-    when(repository.findById(txId)).thenReturn(Optional.of(approvedTransaction));
+    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(
+        Optional.of(approvedTransaction));
 
     // When
-    approvedTransactionService.approveTransaction(txId, approvingMspId);
+    approvedTransactionService.approveTransaction(txId, containerNum, approvingMspId);
 
     // Then
     assertTrue(
@@ -175,15 +181,17 @@ public class ApprovedTransactionServiceTest {
   public void throwsExceptionWhenApprovingNonExistedTransaction() {
     // Given
     String txId = "12345";
+    int containerNum = 1;
     String approvingMspId = "Container5MSP";
 
-    when(repository.findById(txId)).thenReturn(Optional.empty());
+    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(Optional.empty());
 
     // When & Then
     Exception exception = assertThrows(IllegalArgumentException.class,
-        () -> approvedTransactionService.approveTransaction(txId, approvingMspId));
+        () -> approvedTransactionService.approveTransaction(txId, containerNum, approvingMspId));
 
-    assertEquals(String.format("Transaction %s not found", txId), exception.getMessage());
+    assertEquals(String.format("Transaction %s for container %d is not found", txId, containerNum),
+        exception.getMessage());
   }
 
 }
