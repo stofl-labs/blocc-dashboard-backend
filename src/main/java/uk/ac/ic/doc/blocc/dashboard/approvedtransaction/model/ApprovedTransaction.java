@@ -34,6 +34,13 @@ public class ApprovedTransaction {
     this.reading = reading;
   }
 
+  public ApprovedTransaction(String txId, int containerNum,
+                             TemperatureHumidityReading reading) {
+    this.txId = txId;
+    this.containerNum = containerNum;
+    this.reading = reading;
+  }
+
   public ApprovedTransaction() {
   }
 
