@@ -5,7 +5,6 @@ import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
@@ -23,8 +22,6 @@ public class ApprovedTransaction {
   @CollectionTable
   private List<String> approvingMspIds = new ArrayList<>();
   private TemperatureHumidityReading reading;
-  @Transient
-  private int approvals;
 
   public ApprovedTransaction(String txId, int containerNum, List<String> approvingMspIds,
                              TemperatureHumidityReading reading) {
