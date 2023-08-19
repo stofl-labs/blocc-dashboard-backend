@@ -2,6 +2,7 @@ package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -148,6 +149,41 @@ public class ApprovedTransactionServiceTest {
 
     // Assert the exception message
     assertEquals(String.format("Transaction %s exists", txId), exception.getMessage());
+  }
+
+  @Test
+  public void testApproveTransaction_Success() {
+    // Given
+    String txId = "12345";
+    String approvingMspId = "Container5MSP";
+    ApprovedTransaction approvedTransaction =
+        new ApprovedTransaction(txId, 1,
+            new TemperatureHumidityReading()); // Assuming there's a default constructor or use another appropriate constructor
+
+    when(repository.findById(txId)).thenReturn(Optional.of(approvedTransaction));
+
+    // When
+    approvedTransactionService.approveTransaction(txId, approvingMspId);
+
+    // Then
+    assertTrue(
+        approvedTransaction.getApprovingMspIds().contains(approvingMspId));
+    verify(repository).save(approvedTransaction);
+  }
+
+  @Test
+  public void throwsExceptionWhenApprovingNonExistedTransaction() {
+    // Given
+    String txId = "12345";
+    String approvingMspId = "Container5MSP";
+
+    when(repository.findById(txId)).thenReturn(Optional.empty());
+
+    // When & Then
+    Exception exception = assertThrows(IllegalArgumentException.class,
+        () -> approvedTransactionService.approveTransaction(txId, approvingMspId));
+
+    assertEquals(String.format("Transaction %s not found", txId), exception.getMessage());
   }
 
 }

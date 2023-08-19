@@ -64,4 +64,12 @@ public class ApprovedTransaction {
   public int getContainerNum() {
     return containerNum;
   }
+
+  public void approve(String approvingMspId) {
+    if (approvingMspIds.contains(approvingMspId)) {
+      throw new IllegalArgumentException(
+          String.format("%s has already approved this transaction", approvingMspId));
+    }
+    approvingMspIds.add(approvingMspId);
+  }
 }

@@ -1,6 +1,7 @@
 package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTempReading;
@@ -45,5 +46,17 @@ public class ApprovedTransactionService {
     }
 
     repository.save(new ApprovedTransaction(txId, containerNum, reading));
+  }
+
+  public void approveTransaction(String txId, String approvingMspId) {
+    Optional<ApprovedTransaction> possibleTx = repository.findById(txId);
+    if (possibleTx.isEmpty()) {
+      throw new IllegalArgumentException(String.format("Transaction %s not found", txId));
+    }
+
+    ApprovedTransaction approvedTransaction = possibleTx.get();
+    approvedTransaction.approve(approvingMspId);
+
+    repository.save(approvedTransaction);
   }
 }
