@@ -13,9 +13,12 @@ import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import org.hyperledger.fabric.client.Gateway;
+import org.hyperledger.fabric.client.Network;
 import org.hyperledger.fabric.client.identity.Identities;
 import org.hyperledger.fabric.client.identity.Identity;
 import org.hyperledger.fabric.client.identity.Signer;
@@ -44,6 +47,8 @@ public class BloccConnections implements DisposableBean {
 
   private final Gateway gateway;
   private final ManagedChannel grcpChannel;
+
+  private final Map<Integer, Network> channels = new HashMap<>();
 
   /**
    * Establish gRPC connection to create a Gateway, which can be used to connect to the BLOCC
@@ -165,8 +170,21 @@ public class BloccConnections implements DisposableBean {
     }
   }
 
-  public Gateway getGateway() {
-    return gateway;
+  public void connectToChannel(int channelNum) {
+    String channelName = String.format("channel%d", channelNum);
+    if (channels.containsKey(channelNum)) {
+      throw new IllegalArgumentException(String.format("%s already exists", channelName));
+    }
+
+    channels.put(channelNum, gateway.getNetwork(channelName));
+  }
+
+  public Network getChannel(int channelNum) {
+    return channels.get(channelNum);
+  }
+
+  public void connectToChannels(Iterable<Integer> channelNums) {
+    channelNums.forEach(this::connectToChannel);
   }
 
   @Override

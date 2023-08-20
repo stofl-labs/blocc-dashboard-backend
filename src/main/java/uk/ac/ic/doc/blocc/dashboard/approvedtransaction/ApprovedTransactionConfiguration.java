@@ -5,7 +5,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.hyperledger.fabric.client.CloseableIterator;
-import org.hyperledger.fabric.client.Gateway;
 import org.hyperledger.fabric.client.Network;
 import org.hyperledger.fabric.protos.common.Block;
 import org.hyperledger.fabric.protos.common.Envelope;
@@ -41,13 +40,13 @@ public class ApprovedTransactionConfiguration {
   CommandLineRunner commandLineRunner() {
     return args -> {
 
-      Gateway gateway = connections.getGateway();
-
       // TODO: read from external file
       List<Integer> availableChannelNums = List.of(5);
 
+      connections.connectToChannels(availableChannelNums);
+
       availableChannelNums.forEach(availableChannelNum -> {
-        Network channel = gateway.getNetwork(String.format("channel%d", availableChannelNum));
+        Network channel = connections.getChannel(availableChannelNum);
         CloseableIterator<Block> blockEvents =
             channel.newBlockEventsRequest().startBlock(0).build().getEvents();
 
