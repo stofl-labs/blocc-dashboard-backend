@@ -50,4 +50,33 @@ public class TemperatureHumidityReading {
         relativeHumidity,
         Instant.ofEpochSecond(timestamp).toString());
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    TemperatureHumidityReading that = (TemperatureHumidityReading) o;
+
+    if (Float.compare(that.temperature, temperature) != 0) {
+      return false;
+    }
+    if (Float.compare(that.relativeHumidity, relativeHumidity) != 0) {
+      return false;
+    }
+    return timestamp == that.timestamp;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = (temperature != 0.0f ? Float.floatToIntBits(temperature) : 0);
+    result = 31 * result + (relativeHumidity != 0.0f ? Float.floatToIntBits(relativeHumidity) : 0);
+    result = 31 * result + (int) (timestamp ^ (timestamp >>> 32));
+    return result;
+  }
+
 }

@@ -42,7 +42,7 @@ jacocoTestReport {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it,
                     exclude: [
-                            'uk/ac/ic/doc/blocc/dashboard/fabric/**',
+                            'uk/ac/ic/doc/blocc/dashboard/fabric/BloccConnections.class',
                             'uk/ac/ic/doc/blocc/dashboard/BloccDashboardApplication.class',
                             'uk/ac/ic/doc/blocc/dashboard/approvedtransaction/ApprovedTransactionConfiguration.class'
                     ])
