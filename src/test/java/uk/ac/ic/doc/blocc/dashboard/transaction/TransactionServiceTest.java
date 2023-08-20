@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
+package uk.ac.ic.doc.blocc.dashboard.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,18 +17,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTempReading;
-import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTransaction;
-import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.CompositeKey;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTransaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.CompositeKey;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
-public class ApprovedTransactionServiceTest {
+public class TransactionServiceTest {
 
   @InjectMocks
-  private ApprovedTransactionService approvedTransactionService;
+  private TransactionService transactionService;
 
   @Mock
-  private ApprovedTransactionRepository repository;
+  private TransactionRepository repository;
 
   @BeforeEach
   public void setUp() {
@@ -53,7 +53,7 @@ public class ApprovedTransactionServiceTest {
     when(repository.findAllByContainerNum(containerNum)).thenReturn(mockData);
 
     List<ApprovedTempReading> result =
-        approvedTransactionService.getApprovedTempReadings(containerNum);
+        transactionService.getApprovedTempReadings(containerNum);
 
     assertEquals(2, result.size());
 
@@ -68,7 +68,7 @@ public class ApprovedTransactionServiceTest {
 
   @Test
   public void addsSensorChaincodeTransaction() {
-    approvedTransactionService.addTempReading("tx6789", 1,
+    transactionService.addTempReading("tx6789", 1,
         30, 0.9F, 300L);
 
     // Create an ArgumentCaptor for ApprovedTransaction
@@ -103,7 +103,7 @@ public class ApprovedTransactionServiceTest {
     // When & Then
     IllegalArgumentException exception = assertThrows(
         IllegalArgumentException.class,
-        () -> approvedTransactionService.addTempReading(txId, containerNum, temperature,
+        () -> transactionService.addTempReading(txId, containerNum, temperature,
             relativeHumidity, timestamp)
     );
 
@@ -114,7 +114,7 @@ public class ApprovedTransactionServiceTest {
   @Test
   public void addsSensorChaincodeTransactionWithReading() {
     TemperatureHumidityReading reading = new TemperatureHumidityReading(30, 0.9F, 300L);
-    approvedTransactionService.addTempReading("tx6789", 1, reading);
+    transactionService.addTempReading("tx6789", 1, reading);
 
     // Create an ArgumentCaptor for ApprovedTransaction
     ArgumentCaptor<ApprovedTransaction> captor = ArgumentCaptor.forClass(ApprovedTransaction.class);
@@ -148,7 +148,7 @@ public class ApprovedTransactionServiceTest {
     // When & Then
     IllegalArgumentException exception = assertThrows(
         IllegalArgumentException.class,
-        () -> approvedTransactionService.addTempReading(txId, containerNum, reading)
+        () -> transactionService.addTempReading(txId, containerNum, reading)
     );
 
     // Assert the exception message
@@ -170,7 +170,7 @@ public class ApprovedTransactionServiceTest {
         Optional.of(approvedTransaction));
 
     // When
-    approvedTransactionService.approveTransaction(txId, containerNum, approvingMspId);
+    transactionService.approveTransaction(txId, containerNum, approvingMspId);
 
     // Then
     assertTrue(
@@ -189,7 +189,7 @@ public class ApprovedTransactionServiceTest {
 
     // When & Then
     Exception exception = assertThrows(IllegalArgumentException.class,
-        () -> approvedTransactionService.approveTransaction(txId, containerNum, approvingMspId));
+        () -> transactionService.approveTransaction(txId, containerNum, approvingMspId));
 
     assertEquals(String.format("Transaction %s for container %d is not found", txId, containerNum),
         exception.getMessage());
@@ -214,7 +214,7 @@ public class ApprovedTransactionServiceTest {
 
     // When & Then
     Exception exception = assertThrows(IllegalArgumentException.class,
-        () -> approvedTransactionService.approveTransaction(txId, containerNum, approvingMspId));
+        () -> transactionService.approveTransaction(txId, containerNum, approvingMspId));
 
     assertEquals(String.format("%s has already approved this transaction", approvingMspId),
         exception.getMessage());

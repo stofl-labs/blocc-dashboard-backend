@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
+package uk.ac.ic.doc.blocc.dashboard.transaction;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,14 +10,14 @@ import java.util.List;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTransaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTransaction;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class ApprovedTransactionRepositoryTest {
+public class TransactionRepositoryTest {
 
   static final PostgreSQLContainer<?> postgres =
       new PostgreSQLContainer<>("postgres:latest");
@@ -37,7 +37,7 @@ public class ApprovedTransactionRepositoryTest {
   private TestEntityManager entityManager;
 
   @Autowired
-  private ApprovedTransactionRepository repository;
+  private TransactionRepository repository;
 
   @Test
   public void testFindAllByContainerNum() {

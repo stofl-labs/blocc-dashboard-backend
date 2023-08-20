@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model;
+package uk.ac.ic.doc.blocc.dashboard.transaction.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

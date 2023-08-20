@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model;
+package uk.ac.ic.doc.blocc.dashboard.transaction.model;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
@@ -22,14 +22,14 @@ public class ApprovedTransaction {
   private TemperatureHumidityReading reading;
 
   public ApprovedTransaction(String txId, int containerNum, List<String> approvingMspIds,
-                             TemperatureHumidityReading reading) {
+      TemperatureHumidityReading reading) {
     key = new CompositeKey(txId, containerNum);
     this.approvingMspIds = approvingMspIds;
     this.reading = reading;
   }
 
   public ApprovedTransaction(String txId, int containerNum,
-                             TemperatureHumidityReading reading) {
+      TemperatureHumidityReading reading) {
     key = new CompositeKey(txId, containerNum);
     this.reading = reading;
   }

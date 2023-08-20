@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model;
+package uk.ac.ic.doc.blocc.dashboard.transaction.model;
 
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
@@ -6,6 +6,7 @@ import java.util.Objects;
 
 @Embeddable
 public class CompositeKey implements Serializable {
+
   private String txId;
   private int containerNum;
 

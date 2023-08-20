@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
+package uk.ac.ic.doc.blocc.dashboard.transaction;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -7,21 +7,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTempReading;
-import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTransaction;
-import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.CompositeKey;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTransaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.CompositeKey;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
 @Service
-public class ApprovedTransactionService {
+public class TransactionService {
 
-  private final ApprovedTransactionRepository repository;
+  private final TransactionRepository repository;
 
   private static final Logger logger =
-      LoggerFactory.getLogger(ApprovedTransactionService.class);
+      LoggerFactory.getLogger(TransactionService.class);
 
   @Autowired
-  public ApprovedTransactionService(ApprovedTransactionRepository repository) {
+  public TransactionService(TransactionRepository repository) {
     this.repository = repository;
   }
 
@@ -37,8 +37,8 @@ public class ApprovedTransactionService {
   }
 
   public void addTempReading(String txId, int containerNum, float temperature,
-                             float relativeHumidity,
-                             long timestamp) {
+      float relativeHumidity,
+      long timestamp) {
     if (repository.findById(new CompositeKey(txId, containerNum)).isPresent()) {
       throw new IllegalArgumentException(String.format("Transaction %s exists", txId));
     }
@@ -68,7 +68,7 @@ public class ApprovedTransactionService {
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
-    
+
     ApprovedTransaction approvedTransaction = possibleTx.get();
     approvedTransaction.approve(approvingMspId);
 

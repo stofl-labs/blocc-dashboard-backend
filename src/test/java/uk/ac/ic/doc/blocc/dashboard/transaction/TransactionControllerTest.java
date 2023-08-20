@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
+package uk.ac.ic.doc.blocc.dashboard.transaction;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -13,16 +13,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import uk.ac.ic.doc.blocc.dashboard.approvedtransaction.model.ApprovedTempReading;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
 
-@WebMvcTest(ApprovedTransactionController.class)
-class ApprovedTransactionControllerTest {
+@WebMvcTest(TransactionController.class)
+class TransactionControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
 
   @MockBean
-  private ApprovedTransactionService approvedTransactionService;
+  private TransactionService transactionService;
 
   @Test
   public void getApprovedTransactionsIfExist() throws Exception {
@@ -32,9 +32,9 @@ class ApprovedTransactionControllerTest {
         new ApprovedTempReading(102L, 20F, 2, "tx456")
     );
 
-    when(approvedTransactionService.getApprovedTempReadings(containerNum)).thenReturn(mockData);
+    when(transactionService.getApprovedTempReadings(containerNum)).thenReturn(mockData);
 
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/approvedTempReading/all")
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/approvedTempReadings")
             .param("containerNum", String.valueOf(containerNum)))
         .andExpect(status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(2));
@@ -45,9 +45,9 @@ class ApprovedTransactionControllerTest {
     int containerNum = 3;
     List<ApprovedTempReading> mockData = new ArrayList<>();
 
-    when(approvedTransactionService.getApprovedTempReadings(containerNum)).thenReturn(mockData);
+    when(transactionService.getApprovedTempReadings(containerNum)).thenReturn(mockData);
 
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/approvedTempReading/all")
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/approvedTempReadings")
             .param("containerNum", String.valueOf(containerNum)))
         .andExpect(status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(0));

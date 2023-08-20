@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
+package uk.ac.ic.doc.blocc.dashboard.transaction;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -23,15 +23,15 @@ import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
 @Configuration
 @Profile("prod")
-public class ApprovedTransactionConfiguration {
+public class TransactionConfiguration {
 
-  private final ApprovedTransactionService service;
+  private final TransactionService service;
   private final BloccConnections connections;
   private static final Logger logger =
-      LoggerFactory.getLogger(ApprovedTransactionConfiguration.class);
+      LoggerFactory.getLogger(TransactionConfiguration.class);
 
   @Autowired
-  public ApprovedTransactionConfiguration(ApprovedTransactionService service,
+  public TransactionConfiguration(TransactionService service,
       BloccConnections connections) {
     this.service = service;
     this.connections = connections;
