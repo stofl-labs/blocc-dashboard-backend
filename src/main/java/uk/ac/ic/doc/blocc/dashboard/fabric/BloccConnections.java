@@ -180,7 +180,14 @@ public class BloccConnections implements DisposableBean {
   }
 
   public Network getChannel(int channelNum) {
-    return channels.get(channelNum);
+    Network channel = channels.get(channelNum);
+
+    if (channel == null) {
+      throw new IllegalArgumentException(
+          String.format("No connection was established to channel%d", channelNum));
+    }
+
+    return channel;
   }
 
   public void connectToChannels(Iterable<Integer> channelNums) {
