@@ -18,8 +18,6 @@ import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
 public class BloccTransactionProtoUtils {
 
-  // TODO: write UTs
-
   private static ChaincodeInvocationSpec getChaincodeInvocationSpec(Envelope envelope)
       throws InvalidProtocolBufferException {
     Payload payload = Payload.parseFrom(envelope.getPayload());
@@ -129,5 +127,21 @@ public class BloccTransactionProtoUtils {
     }
 
     return false;
+  }
+
+  /**
+   * Extract the MSP ID that created the transaction.
+   *
+   * @param envelope a transaction envelope
+   * @return the MSP ID that created the transaction
+   */
+  public static String extractCreatorMspId(Envelope envelope)
+      throws InvalidProtocolBufferException {
+    Payload payload = Payload.parseFrom(envelope.getPayload());
+    SignatureHeader signatureHeader = SignatureHeader.parseFrom(
+        payload.getHeader().getSignatureHeader());
+    SerializedIdentity serializedIdentity = SerializedIdentity.parseFrom(
+        signatureHeader.getCreator());
+    return serializedIdentity.getMspid();
   }
 }
