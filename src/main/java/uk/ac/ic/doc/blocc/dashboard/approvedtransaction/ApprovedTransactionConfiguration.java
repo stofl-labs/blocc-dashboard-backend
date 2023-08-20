@@ -2,8 +2,10 @@ package uk.ac.ic.doc.blocc.dashboard.approvedtransaction;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.hyperledger.fabric.client.CloseableIterator;
 import org.hyperledger.fabric.client.Network;
 import org.hyperledger.fabric.protos.common.Block;
@@ -40,8 +42,10 @@ public class ApprovedTransactionConfiguration {
   CommandLineRunner commandLineRunner() {
     return args -> {
 
-      // TODO: read from external file
-      List<Integer> availableChannelNums = List.of(5);
+      String channelNumsEnv = System.getenv().getOrDefault("FABRIC_AVAILABLE_CONTAINERS", "5,6");
+      List<Integer> availableChannelNums = Arrays.stream(channelNumsEnv.split(","))
+          .map(Integer::parseInt)
+          .collect(Collectors.toList());
 
       connections.connectToChannels(availableChannelNums);
 
