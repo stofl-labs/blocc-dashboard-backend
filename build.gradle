@@ -44,7 +44,7 @@ jacocoTestReport {
                     exclude: [
                             'uk/ac/ic/doc/blocc/dashboard/fabric/BloccConnections.class',
                             'uk/ac/ic/doc/blocc/dashboard/BloccDashboardApplication.class',
-                            'uk/ac/ic/doc/blocc/dashboard/approvedtransaction/ApprovedTransactionConfiguration.class'
+                            'uk/ac/ic/doc/blocc/dashboard/transaction/TransactionConfiguration.class'
                     ])
         }))
     }
