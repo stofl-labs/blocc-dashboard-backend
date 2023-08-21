@@ -2,8 +2,6 @@ package uk.ac.ic.doc.blocc.dashboard.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,10 +15,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
-import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTransaction;
-import uk.ac.ic.doc.blocc.dashboard.transaction.model.CompositeKey;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovalTransaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.CompositeKey;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.SensorChaincodeTransaction;
 
 public class TransactionServiceTest {
 
@@ -28,7 +27,10 @@ public class TransactionServiceTest {
   private TransactionService transactionService;
 
   @Mock
-  private TransactionRepository repository;
+  private SensorChaincodeTransactionRepository sensorChaincodeTransactionRepository;
+
+  @Mock
+  private ApprovalTransactionRepository approvalTransactionRepository;
 
   @BeforeEach
   public void setUp() {
@@ -36,21 +38,22 @@ public class TransactionServiceTest {
   }
 
   @Test
-  public void getApprovedTempReadingsTest() {
+  public void getsApprovedTempReadings() {
     int containerNum = 1;
-    List<ApprovedTransaction> mockData = Arrays.asList(
-        new ApprovedTransaction(
+    List<SensorChaincodeTransaction> mockData = Arrays.asList(
+        new SensorChaincodeTransaction(
             "tx123",
-            1, List.of("Container5MSP", "Container6MSP"),
+            1, "creator", 100L,
             new TemperatureHumidityReading(25, 0.3F, 100L)),
 
-        new ApprovedTransaction(
+        new SensorChaincodeTransaction(
             "tx1299",
-            1, List.of("Container5MSP"),
+            1, "creator", 100L,
             new TemperatureHumidityReading(22, 0.3F, 100L))
     );
 
-    when(repository.findAllByContainerNum(containerNum)).thenReturn(mockData);
+    when(sensorChaincodeTransactionRepository.findAllByContainerNum(containerNum)).thenReturn(
+        mockData);
 
     List<ApprovedTempReading> result =
         transactionService.getApprovedTempReadings(containerNum);
@@ -58,8 +61,8 @@ public class TransactionServiceTest {
     assertEquals(2, result.size());
 
     // Expected ApprovedTempReadings based on the mock data
-    ApprovedTempReading expectedFirstReading = new ApprovedTempReading(100L, 25, 2, "tx123");
-    ApprovedTempReading expectedSecondReading = new ApprovedTempReading(100L, 22, 1, "tx1299");
+    ApprovedTempReading expectedFirstReading = new ApprovedTempReading(100L, 25, 0, "tx123");
+    ApprovedTempReading expectedSecondReading = new ApprovedTempReading(100L, 22, 0, "tx1299");
 
     // Assertions
     assertEquals(expectedFirstReading, result.get(0));
@@ -68,63 +71,14 @@ public class TransactionServiceTest {
 
   @Test
   public void addsSensorChaincodeTransaction() {
-    transactionService.addTempReading("tx6789", 1,
-        30, 0.9F, 300L);
-
-    // Create an ArgumentCaptor for ApprovedTransaction
-    ArgumentCaptor<ApprovedTransaction> captor = ArgumentCaptor.forClass(ApprovedTransaction.class);
-
-    verify(repository, times(1)).save(captor.capture());
-
-    // Retrieve the captured argument
-    ApprovedTransaction capturedTransaction = captor.getValue();
-
-    // Now you can assert on the properties of the captured ApprovedTransaction
-    assertEquals("tx6789", capturedTransaction.getTxId());
-    assertEquals(1, capturedTransaction.getContainerNum());
-    assertEquals(30, capturedTransaction.getReading().getTemperature());
-    assertEquals(0.9F, capturedTransaction.getReading().getRelativeHumidity());
-    assertEquals(300L, capturedTransaction.getReading().getTimestamp());
-  }
-
-  @Test
-  public void throwsExceptionWhenSavingReadingToExistedTransaction() {
-    // Given
-    String txId = "tx6789";
-    int containerNum = 1;
-    float temperature = 30;
-    float relativeHumidity = 0.9F;
-    long timestamp = 300L;
-
-    // Mock the repository to return an Optional containing a transaction when findById is called
-    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(
-        Optional.of(new ApprovedTransaction()));
-
-    // When & Then
-    IllegalArgumentException exception = assertThrows(
-        IllegalArgumentException.class,
-        () -> transactionService.addTempReading(txId, containerNum, temperature,
-            relativeHumidity, timestamp)
-    );
-
-    // Assert the exception message
-    assertEquals(String.format("Transaction %s exists", txId), exception.getMessage());
-  }
-
-  @Test
-  public void addsSensorChaincodeTransactionWithReading() {
     TemperatureHumidityReading reading = new TemperatureHumidityReading(30, 0.9F, 300L);
-    transactionService.addTempReading("tx6789", 1, reading);
+    transactionService.addSensorChaincodeTransaction("tx6789", 1, "creator", 300L, reading);
 
-    // Create an ArgumentCaptor for ApprovedTransaction
-    ArgumentCaptor<ApprovedTransaction> captor = ArgumentCaptor.forClass(ApprovedTransaction.class);
+    ArgumentCaptor<SensorChaincodeTransaction> captor = ArgumentCaptor.forClass(
+        SensorChaincodeTransaction.class);
+    verify(sensorChaincodeTransactionRepository, times(1)).save(captor.capture());
 
-    verify(repository, times(1)).save(captor.capture());
-
-    // Retrieve the captured argument
-    ApprovedTransaction capturedTransaction = captor.getValue();
-
-    // Now you can assert on the properties of the captured ApprovedTransaction
+    SensorChaincodeTransaction capturedTransaction = captor.getValue();
     assertEquals("tx6789", capturedTransaction.getTxId());
     assertEquals(1, capturedTransaction.getContainerNum());
     assertEquals(30, capturedTransaction.getReading().getTemperature());
@@ -133,94 +87,103 @@ public class TransactionServiceTest {
   }
 
   @Test
-  public void throwsExceptionWhenSavingReadingObjectToExistedTransaction() {
-    // Given
+  public void throwsExceptionWhenAddingExistingSensorChaincodeTransaction() {
     String txId = "tx6789";
-    TemperatureHumidityReading reading = new TemperatureHumidityReading(
-        30, 0.9F, 300L);
-
     int containerNum = 1;
+    TemperatureHumidityReading reading = new TemperatureHumidityReading(30, 0.9F, 300L);
 
-    // Mock the repository to return an Optional containing a transaction when findById is called
-    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(
-        Optional.of(new ApprovedTransaction()));
+    when(sensorChaincodeTransactionRepository.findById(
+        new CompositeKey(txId, containerNum))).thenReturn(
+        Optional.of(new SensorChaincodeTransaction(txId, containerNum, "creator", 300L)));
 
-    // When & Then
     IllegalArgumentException exception = assertThrows(
         IllegalArgumentException.class,
-        () -> transactionService.addTempReading(txId, containerNum, reading)
+        () -> transactionService.addSensorChaincodeTransaction(txId, containerNum, "creator", 300L,
+            reading)
     );
 
-    // Assert the exception message
     assertEquals(String.format("Transaction %s for container %d exists", txId, containerNum),
         exception.getMessage());
   }
 
   @Test
-  public void approvesExistingTransaction() {
-    // Given
+  public void addsApprovalTransaction() {
     String txId = "12345";
     int containerNum = 1;
     String approvingMspId = "Container5MSP";
-    ApprovedTransaction approvedTransaction =
-        new ApprovedTransaction(txId, 1,
-            new TemperatureHumidityReading()); // Assuming there's a default constructor or use another appropriate constructor
+    long createdTime = System.currentTimeMillis();
+    String approvedTxId = "67890";
 
-    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(
-        Optional.of(approvedTransaction));
+    SensorChaincodeTransaction mockTransaction = new SensorChaincodeTransaction(approvedTxId,
+        containerNum, "creator", createdTime, new TemperatureHumidityReading());
 
-    // When
-    transactionService.approveTransaction(txId, containerNum, approvingMspId);
+    when(sensorChaincodeTransactionRepository.findById(
+        new CompositeKey(approvedTxId, containerNum))).thenReturn(Optional.of(mockTransaction));
 
-    // Then
-    assertTrue(
-        approvedTransaction.getApprovingMspIds().contains(approvingMspId));
-    verify(repository).save(approvedTransaction);
+    transactionService.addApprovalTransaction(txId, containerNum, approvingMspId, createdTime,
+        approvedTxId);
+
+    ArgumentCaptor<ApprovalTransaction> captor = ArgumentCaptor.forClass(ApprovalTransaction.class);
+    verify(approvalTransactionRepository, times(1)).save(captor.capture());
+
+    ApprovalTransaction capturedApproval = captor.getValue();
+    assertEquals(txId, capturedApproval.getTxId());
+    assertEquals(containerNum, capturedApproval.getContainerNum());
+    assertEquals(approvingMspId, capturedApproval.getCreator());
   }
 
   @Test
-  public void throwsExceptionWhenApprovingNonExistedTransaction() {
-    // Given
+  public void throwsExceptionWhenApprovingNonExistentSensorChaincodeTransaction() {
     String txId = "12345";
     int containerNum = 1;
     String approvingMspId = "Container5MSP";
+    long createdTime = System.currentTimeMillis();
+    String approvedTxId = "67890";
 
-    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(Optional.empty());
+    when(sensorChaincodeTransactionRepository.findById(
+        new CompositeKey(approvingMspId, containerNum))).thenReturn(Optional.empty());
 
-    // When & Then
     Exception exception = assertThrows(IllegalArgumentException.class,
-        () -> transactionService.approveTransaction(txId, containerNum, approvingMspId));
+        () -> transactionService.addApprovalTransaction(txId, containerNum, approvingMspId,
+            createdTime, approvedTxId));
 
-    assertEquals(String.format("Transaction %s for container %d is not found", txId, containerNum),
+    assertEquals(
+        String.format("Transaction %s for container %d is not found", approvedTxId, containerNum),
         exception.getMessage());
   }
 
   @Test
-  public void transactionRollbacksWhenApprovingAlreadyApprovedTransaction() {
-    // Given
+  public void throwsExceptionWhenSameApprovalTransactionApprovesSensorTransactionAgain() {
     String txId = "12345";
     int containerNum = 1;
     String approvingMspId = "Container5MSP";
-    ApprovedTransaction approvedTransaction =
-        new ApprovedTransaction(txId, containerNum,
-            new TemperatureHumidityReading());
+    long readingCreatedTime = 0L;
+    long approvalCreatedTime = 1L;
+    String approvedTxId = "67890";
 
-    // Mock the repository to return the transaction
-    when(repository.findById(new CompositeKey(txId, containerNum))).thenReturn(
-        Optional.of(approvedTransaction));
+    SensorChaincodeTransaction sensorChaincodeTransaction = new SensorChaincodeTransaction(
+        approvedTxId,
+        containerNum, "creator", readingCreatedTime, new TemperatureHumidityReading());
 
-    // Mock the transaction to already have the approvingMspId
-    approvedTransaction.approve(approvingMspId);
+    ApprovalTransaction approvalTransaction = new ApprovalTransaction(txId, containerNum,
+        approvingMspId, approvalCreatedTime, sensorChaincodeTransaction);
 
-    // When & Then
+    when(approvalTransactionRepository.findById(new CompositeKey(txId, containerNum))).thenReturn(
+        Optional.of(approvalTransaction));
+
+    when(sensorChaincodeTransactionRepository.findById(
+        new CompositeKey(approvedTxId, containerNum))).thenReturn(
+        Optional.of(sensorChaincodeTransaction));
+
+    // Attempting to approve again with the same ApprovalTransaction should throw an exception
     Exception exception = assertThrows(IllegalArgumentException.class,
-        () -> transactionService.approveTransaction(txId, containerNum, approvingMspId));
+        () -> transactionService.addApprovalTransaction(txId, containerNum, approvingMspId,
+            approvalCreatedTime, approvedTxId));
 
-    assertEquals(String.format("%s has already approved this transaction", approvingMspId),
+    assertEquals(
+        String.format("%s already exists", approvalTransaction),
         exception.getMessage());
-
-    // Verify that the repository's save method was never called, indicating a rollback
-    verify(repository, times(0)).save(any(ApprovedTransaction.class));
   }
+
 
 }

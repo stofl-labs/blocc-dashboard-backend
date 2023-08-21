@@ -86,19 +86,25 @@ public class TransactionConfiguration {
     String txId = BloccTransactionProtoUtils.extractTransactionId(envelope);
     TemperatureHumidityReading reading =
         BloccTransactionProtoUtils.extractTemperatureHumidityReading(envelope);
+    String creator = BloccTransactionProtoUtils.extractCreatorMspId(envelope);
+    long createdTimestamp = BloccTransactionProtoUtils.extractTransactionTimestamp(envelope);
 
     logger.info("Sensor Chaincode transaction {} ({}) encountered", txId, reading);
 
-    service.addTempReading(txId, availableChannelNum, reading);
+    service.addSensorChaincodeTransaction(txId, availableChannelNum, creator, createdTimestamp,
+        reading);
   }
 
   private void processBsccTransaction(Envelope envelope, int containerNum)
       throws InvalidProtocolBufferException {
     logger.info("BSCC transaction received");
-    String approvingMspId = BloccTransactionProtoUtils.extractApprovingMspId(envelope);
-    String txId = BloccTransactionProtoUtils.extractApprovedTransactionId(envelope);
+    String approvingMspId = BloccTransactionProtoUtils.extractCreatorMspId(envelope);
+    String approvedTxId = BloccTransactionProtoUtils.extractApprovedTransactionId(envelope);
+    String txId = BloccTransactionProtoUtils.extractTransactionId(envelope);
+    long createdTimestamp = BloccTransactionProtoUtils.extractTransactionTimestamp(envelope);
 
-    service.approveTransaction(txId, containerNum, approvingMspId);
+    service.addApprovalTransaction(txId, containerNum, approvingMspId, createdTimestamp,
+        approvedTxId);
   }
 
 }

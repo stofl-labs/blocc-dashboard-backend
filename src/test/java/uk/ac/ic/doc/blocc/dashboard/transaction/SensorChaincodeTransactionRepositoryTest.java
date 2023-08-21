@@ -1,23 +1,23 @@
 package uk.ac.ic.doc.blocc.dashboard.transaction;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-
-import java.util.List;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTransaction;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovalTransaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.SensorChaincodeTransaction;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class TransactionRepositoryTest {
+public class SensorChaincodeTransactionRepositoryTest {
 
   static final PostgreSQLContainer<?> postgres =
       new PostgreSQLContainer<>("postgres:latest");
@@ -37,35 +37,50 @@ public class TransactionRepositoryTest {
   private TestEntityManager entityManager;
 
   @Autowired
-  private TransactionRepository repository;
+  private SensorChaincodeTransactionRepository repository;
 
   @Test
   public void testFindAllByContainerNum() {
     // Given
-    ApprovedTransaction tx1 = new ApprovedTransaction(
+    SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
         "tx123",
-        1, List.of("Container5MSP", "Container6MSP"),
+        1,
+        "Container5MSP",
+        100L,
         new TemperatureHumidityReading(25, 0.3F, 100L));
 
-    ApprovedTransaction tx2 = new ApprovedTransaction(
+    SensorChaincodeTransaction tx2 = new SensorChaincodeTransaction(
         "tx456",
-        3, List.of("Container5MSP", "Container6MSP", "Container7MSP"),
+        3,
+        "Container5MSP",
+        103L,
         new TemperatureHumidityReading(30, 0.2F, 103L));
 
-    ApprovedTransaction tx3 = new ApprovedTransaction(
+    SensorChaincodeTransaction tx3 = new SensorChaincodeTransaction(
         "tx1299",
-        1, List.of("Container5MSP"),
+        1,
+        "Container5MSP",
+        100L,
         new TemperatureHumidityReading(22, 0.3F, 100L));
+
+    ApprovalTransaction approval1 = new ApprovalTransaction(
+        "app1", 1, "Container6MSP", 101L, tx1);
+    ApprovalTransaction approval2 = new ApprovalTransaction(
+        "app2", 1, "Container7MSP", 102L, tx1);
+
     entityManager.persist(tx1);
     entityManager.persist(tx2);
     entityManager.persist(tx3);
+    entityManager.persist(approval1);
+    entityManager.persist(approval2);
     entityManager.flush();
 
     // When
-    List<ApprovedTransaction> found = repository.findAllByContainerNum(1);
+    List<SensorChaincodeTransaction> found = repository.findAllByContainerNum(1);
 
     // Then
     assertThat(found).hasSize(2).contains(tx1, tx3);
     assertThat(found).doesNotContain(tx2);
   }
+
 }

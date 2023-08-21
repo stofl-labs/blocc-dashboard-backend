@@ -7,71 +7,86 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovalTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
-import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTransaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.SensorChaincodeTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.CompositeKey;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 
 @Service
 public class TransactionService {
 
-  private final TransactionRepository repository;
+  private final SensorChaincodeTransactionRepository sensorChaincodeTransactionRepository;
+  private final ApprovalTransactionRepository approvalTransactionRepository;
 
   private static final Logger logger =
       LoggerFactory.getLogger(TransactionService.class);
 
   @Autowired
-  public TransactionService(TransactionRepository repository) {
-    this.repository = repository;
+  public TransactionService(
+      SensorChaincodeTransactionRepository sensorChaincodeTransactionRepository,
+      ApprovalTransactionRepository approvalTransactionRepository) {
+    this.sensorChaincodeTransactionRepository = sensorChaincodeTransactionRepository;
+    this.approvalTransactionRepository = approvalTransactionRepository;
   }
 
   public List<ApprovedTempReading> getApprovedTempReadings(int containerNum) {
-    List<ApprovedTransaction> allApprovedTransactions =
-        repository.findAllByContainerNum(containerNum);
+    List<SensorChaincodeTransaction> allSensorChaincodeTransactions =
+        sensorChaincodeTransactionRepository.findAllByContainerNum(containerNum);
 
-    return allApprovedTransactions.stream().map(
+    return allSensorChaincodeTransactions.stream().map(
         tx -> new ApprovedTempReading(tx.getReading().getTimestamp(),
             tx.getReading().getTemperature(),
-            tx.getApprovals(), tx.getTxId())).toList();
+            tx.getApprovalCount(),
+            tx.getTxId())).toList();
 
   }
 
-  public void addTempReading(String txId, int containerNum, float temperature,
-      float relativeHumidity,
-      long timestamp) {
-    if (repository.findById(new CompositeKey(txId, containerNum)).isPresent()) {
-      throw new IllegalArgumentException(String.format("Transaction %s exists", txId));
-    }
-
-    repository.save(new ApprovedTransaction(txId, containerNum,
-        new TemperatureHumidityReading(temperature, relativeHumidity, timestamp)));
-  }
-
-  public void addTempReading(String txId, int containerNum, TemperatureHumidityReading reading) {
-    if (repository.findById(new CompositeKey(txId, containerNum)).isPresent()) {
+  public void addSensorChaincodeTransaction(String txId, int containerNum, String creator,
+      long createdTimestamp,
+      TemperatureHumidityReading reading) {
+    if (sensorChaincodeTransactionRepository.findById(new CompositeKey(txId, containerNum))
+        .isPresent()) {
       throw new IllegalArgumentException(
           String.format("Transaction %s for container %d exists", txId, containerNum));
     }
 
-    repository.save(new ApprovedTransaction(txId, containerNum, reading));
+    sensorChaincodeTransactionRepository.save(
+        new SensorChaincodeTransaction(txId, containerNum, creator, createdTimestamp, reading));
   }
 
   @Transactional
-  public void approveTransaction(String txId, int containerNum, String approvingMspId) {
-    logger.info("{} is approving Transaction {} for container {}", approvingMspId, txId,
-        containerNum);
-    Optional<ApprovedTransaction> possibleTx =
-        repository.findById(new CompositeKey(txId, containerNum));
-    if (possibleTx.isEmpty()) {
+  public void addApprovalTransaction(String txId, int containerNum, String approvingMspId,
+      long createdTime, String approvedTxId) {
+    logger.info("Transaction (txId={}, creator={}) is approving Transaction {} for container {}",
+        txId, approvingMspId, approvedTxId, containerNum);
+
+    Optional<ApprovalTransaction> possibleApprovalTx = approvalTransactionRepository.findById(
+        new CompositeKey(txId, containerNum));
+
+    if (possibleApprovalTx.isPresent()) {
       String msg =
-          String.format("Transaction %s for container %d is not found", txId, containerNum);
+          String.format("%s already exists", possibleApprovalTx.get());
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
 
-    ApprovedTransaction approvedTransaction = possibleTx.get();
-    approvedTransaction.approve(approvingMspId);
+    Optional<SensorChaincodeTransaction> possibleSensorChaincodeTx =
+        sensorChaincodeTransactionRepository.findById(
+            new CompositeKey(approvedTxId, containerNum));
 
-    repository.save(approvedTransaction);
+    if (possibleSensorChaincodeTx.isEmpty()) {
+      String msg =
+          String.format("Transaction %s for container %d is not found", approvedTxId,
+              containerNum);
+      logger.error(msg);
+      throw new IllegalArgumentException(msg);
+    }
+
+    SensorChaincodeTransaction sensorChaincodeTransaction = possibleSensorChaincodeTx.get();
+    ApprovalTransaction approvalTransaction = new ApprovalTransaction(txId, containerNum,
+        approvingMspId, createdTime, sensorChaincodeTransaction);
+
+    approvalTransactionRepository.save(approvalTransaction);
   }
 }
