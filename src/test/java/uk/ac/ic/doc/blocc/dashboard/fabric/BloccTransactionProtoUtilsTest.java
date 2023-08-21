@@ -69,13 +69,7 @@ class BloccTransactionProtoUtilsTest {
   void isSensorChaincodeReturnsTrueWhenSensorChaincodeTransactionGiven() throws Exception {
     assertTrue(BloccTransactionProtoUtils.isSensorChaincode(sensorChaincodeTx));
   }
-
-  @Test
-  void extractsApprovingMspIdFromBsccBlock() throws Exception {
-    String mspId = BloccTransactionProtoUtils.extractApprovingMspId(bsccTx);
-    assertEquals("Container6MSP", mspId);
-  }
-
+  
   @Test
   void extractCreatorMspId() throws InvalidProtocolBufferException {
     assertEquals("Container6MSP", BloccTransactionProtoUtils.extractCreatorMspId(bsccTx));

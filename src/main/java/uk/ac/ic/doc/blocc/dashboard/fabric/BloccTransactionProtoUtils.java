@@ -77,16 +77,6 @@ public class BloccTransactionProtoUtils {
     return new TemperatureHumidityReading(temperature, relativeHumidity, timestamp);
   }
 
-  public static String extractApprovingMspId(Envelope envelope)
-      throws InvalidProtocolBufferException {
-    Payload payload = Payload.parseFrom(envelope.getPayload());
-    SignatureHeader signatureHeader =
-        SignatureHeader.parseFrom(payload.getHeader().getSignatureHeader());
-    SerializedIdentity serializedIdentity =
-        SerializedIdentity.parseFrom(signatureHeader.getCreator());
-    return serializedIdentity.getMspid();
-  }
-
   public static boolean isBscc(Envelope envelope) throws InvalidProtocolBufferException {
     return isTransactionOfChaincode(envelope, "bscc");
   }
@@ -143,5 +133,18 @@ public class BloccTransactionProtoUtils {
     SerializedIdentity serializedIdentity = SerializedIdentity.parseFrom(
         signatureHeader.getCreator());
     return serializedIdentity.getMspid();
+  }
+
+  /**
+   * Extract the timestamp of a transaction.
+   *
+   * @param envelope a transaction envelope
+   * @return the timestamp of the transaction
+   */
+  public static long extractTransactionTimestamp(Envelope envelope)
+      throws InvalidProtocolBufferException {
+    Payload payload = Payload.parseFrom(envelope.getPayload());
+    ChannelHeader channelHeader = ChannelHeader.parseFrom(payload.getHeader().getChannelHeader());
+    return channelHeader.getTimestamp().getSeconds();
   }
 }
