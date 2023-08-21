@@ -12,12 +12,14 @@ import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.SensorChaincodeTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.CompositeKey;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.Transaction;
 
 @Service
 public class TransactionService {
 
   private final SensorChaincodeTransactionRepository sensorChaincodeTransactionRepository;
   private final ApprovalTransactionRepository approvalTransactionRepository;
+  private final TransactionRepository transactionRepository;
 
   private static final Logger logger =
       LoggerFactory.getLogger(TransactionService.class);
@@ -25,9 +27,11 @@ public class TransactionService {
   @Autowired
   public TransactionService(
       SensorChaincodeTransactionRepository sensorChaincodeTransactionRepository,
-      ApprovalTransactionRepository approvalTransactionRepository) {
+      ApprovalTransactionRepository approvalTransactionRepository,
+      TransactionRepository transactionRepository) {
     this.sensorChaincodeTransactionRepository = sensorChaincodeTransactionRepository;
     this.approvalTransactionRepository = approvalTransactionRepository;
+    this.transactionRepository = transactionRepository;
   }
 
   public List<ApprovedTempReading> getApprovedTempReadings(int containerNum) {
@@ -88,5 +92,9 @@ public class TransactionService {
         approvingMspId, createdTime, sensorChaincodeTransaction);
 
     approvalTransactionRepository.save(approvalTransaction);
+  }
+
+  public List<Transaction> getTransactions(int containerNum) {
+    return transactionRepository.findAllByContainerNum(containerNum);
   }
 }

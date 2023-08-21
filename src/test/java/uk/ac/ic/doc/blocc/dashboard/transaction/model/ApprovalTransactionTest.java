@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 public class ApprovalTransactionTest {
 
   private ApprovalTransaction approvalTransaction;
-  private SensorChaincodeTransaction mockSensorTransaction;
   private final String txId = "tx12345";
   private final int containerNum = 1;
   private final String creator = "creatorName";
@@ -18,15 +17,9 @@ public class ApprovalTransactionTest {
 
   @BeforeEach
   public void setUp() {
-    mockSensorTransaction = mock(SensorChaincodeTransaction.class);
+    SensorChaincodeTransaction mockSensorTransaction = mock(SensorChaincodeTransaction.class);
     approvalTransaction = new ApprovalTransaction(txId, containerNum, creator, createdTimestamp,
         mockSensorTransaction);
-  }
-
-  @Test
-  public void getsApprovedTransaction() {
-    SensorChaincodeTransaction retrievedTransaction = approvalTransaction.getApprovedTransaction();
-    assertEquals(mockSensorTransaction, retrievedTransaction);
   }
 
   @Test

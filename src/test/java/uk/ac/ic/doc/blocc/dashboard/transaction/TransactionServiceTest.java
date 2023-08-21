@@ -2,6 +2,7 @@ package uk.ac.ic.doc.blocc.dashboard.transaction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovalTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.CompositeKey;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.SensorChaincodeTransaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.Transaction;
 
 public class TransactionServiceTest {
 
@@ -31,6 +33,8 @@ public class TransactionServiceTest {
 
   @Mock
   private ApprovalTransactionRepository approvalTransactionRepository;
+  @Mock
+  private TransactionRepository transactionRepository;
 
   @BeforeEach
   public void setUp() {
@@ -185,5 +189,43 @@ public class TransactionServiceTest {
         exception.getMessage());
   }
 
+  @Test
+  public void getsTransactions() {
+    int containerNum = 1;
+
+    SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
+        "tx123",
+        1, "creator", 100L,
+        new TemperatureHumidityReading(25, 0.3F, 100L));
+    SensorChaincodeTransaction tx2 = new SensorChaincodeTransaction(
+        "tx1299",
+        1, "creator", 100L,
+        new TemperatureHumidityReading(22, 0.3F, 100L));
+    ApprovalTransaction approval1 = new ApprovalTransaction(
+        "tx222",
+        1, "approvingMSP", 101L, tx1);
+    ApprovalTransaction approval2 = new ApprovalTransaction(
+        "tx223",
+        1, "approvingMSP", 101L, tx2);
+
+    List<Transaction> mockData = Arrays.asList(
+        tx1,
+        tx2,
+        approval1,
+        approval2
+    );
+
+    when(transactionRepository.findAllByContainerNum(containerNum)).thenReturn(mockData);
+
+    List<Transaction> result = transactionService.getTransactions(containerNum);
+
+    assertEquals(4, result.size());
+
+    // Assertions
+    assertTrue(result.contains(tx1));
+    assertTrue(result.contains(tx2));
+    assertTrue(result.contains(approval1));
+    assertTrue(result.contains(approval2));
+  }
 
 }

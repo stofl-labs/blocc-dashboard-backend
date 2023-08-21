@@ -1,5 +1,7 @@
 package uk.ac.ic.doc.blocc.dashboard.transaction.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 public class SensorChaincodeTransaction extends Transaction {
 
   @OneToMany(mappedBy = "sensorChaincodeTransaction")
+  @JsonSerialize(contentUsing = MinimalApprovalTransactionSerializer.class)
   private List<ApprovalTransaction> approvals = new ArrayList<>();
   private TemperatureHumidityReading reading;
 
@@ -37,7 +40,9 @@ public class SensorChaincodeTransaction extends Transaction {
     return "Sensor Chaincode " + super.toString();
   }
 
+  @JsonIgnore
   public int getApprovalCount() {
     return approvals.size();
   }
+
 }

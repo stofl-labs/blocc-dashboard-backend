@@ -1,5 +1,6 @@
 package uk.ac.ic.doc.blocc.dashboard.transaction.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
@@ -15,6 +16,7 @@ public abstract class Transaction {
   }
 
   @EmbeddedId
+  @JsonIgnore
   protected CompositeKey key;
   protected String creator;
   protected long createdTimestamp;
