@@ -2,7 +2,8 @@ package uk.ac.ic.doc.blocc.dashboard.fabric.model;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class TemperatureHumidityReadingTest {
 
@@ -45,7 +46,8 @@ public class TemperatureHumidityReadingTest {
     TemperatureHumidityReading reading = new TemperatureHumidityReading(
         25.5f, 65.5f, 0L);
 
-    String expected = "Temperature=25.500000, Relative Humidity=65.500000, Time=1970-01-01T00:00:00Z";
+    String expected =
+        "Temperature=25.500000, Relative Humidity=65.500000, Time=1970-01-01T00:00:00Z";
     assertEquals(expected, reading.toString());
   }
 
