@@ -19,13 +19,13 @@ public class SensorChaincodeTransaction extends Transaction {
 
   public SensorChaincodeTransaction(String txId, int containerNum, String creator, long timestamp,
       TemperatureHumidityReading reading) {
-    super(txId, containerNum, creator, timestamp);
+    super(txId, containerNum, creator, timestamp, "sensor_chaincode");
     key = new CompositeKey(txId, containerNum);
     this.reading = reading;
   }
 
   public SensorChaincodeTransaction(String txId, int containerNum, String creator, long timestamp) {
-    super(txId, containerNum, creator, timestamp);
+    super(txId, containerNum, creator, timestamp, "sensor_chaincode");
   }
 
   public TemperatureHumidityReading getReading() {

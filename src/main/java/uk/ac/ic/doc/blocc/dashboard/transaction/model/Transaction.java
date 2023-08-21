@@ -18,14 +18,17 @@ public abstract class Transaction {
   protected CompositeKey key;
   protected String creator;
   protected long createdTimestamp;
+  protected String chaincodeName;
 
   protected Transaction() {
   }
 
-  protected Transaction(String txId, int containerNum, String creator, long createdTimestamp) {
+  protected Transaction(String txId, int containerNum, String creator, long createdTimestamp,
+      String chaincodeName) {
     key = new CompositeKey(txId, containerNum);
     this.creator = creator;
     this.createdTimestamp = createdTimestamp;
+    this.chaincodeName = chaincodeName;
   }
 
   public String getTxId() {
@@ -38,6 +41,14 @@ public abstract class Transaction {
 
   public String getCreator() {
     return creator;
+  }
+
+  public long getCreatedTimestamp() {
+    return createdTimestamp;
+  }
+
+  public String getChaincodeName() {
+    return chaincodeName;
   }
 
   public String toString() {

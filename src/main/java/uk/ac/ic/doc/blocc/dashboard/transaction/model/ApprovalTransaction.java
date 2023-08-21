@@ -11,7 +11,7 @@ public class ApprovalTransaction extends Transaction {
 
   public ApprovalTransaction(String txId, int containerNum, String creator, long timestamp,
       SensorChaincodeTransaction sensorChaincodeTransaction) {
-    super(txId, containerNum, creator, timestamp);
+    super(txId, containerNum, creator, timestamp, "bscc");
     this.sensorChaincodeTransaction = sensorChaincodeTransaction;
   }
 

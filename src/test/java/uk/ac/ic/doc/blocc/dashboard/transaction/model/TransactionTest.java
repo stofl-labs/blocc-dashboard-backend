@@ -13,11 +13,12 @@ public class TransactionTest {
   private final String txId = "tx12345";
   private final int containerNum = 1;
   private final String creator = "creatorName";
-  private final long createdTimestamp = System.currentTimeMillis() / 1000L; // Assuming seconds
+  private final long createdTimestamp = 1000L; // Assuming seconds
+  private final String chaincodeName = "ccName";
 
   @BeforeEach
   public void setUp() {
-    transaction = new Transaction(txId, containerNum, creator, createdTimestamp) {
+    transaction = new Transaction(txId, containerNum, creator, createdTimestamp, chaincodeName) {
       // This is an anonymous subclass since Transaction is abstract
     };
   }
@@ -51,5 +52,15 @@ public class TransactionTest {
         "Transaction (txId=%s, container=%d, creator=%s, time=%s)",
         txId, containerNum, creator, Instant.ofEpochSecond(createdTimestamp));
     assertEquals(expectedString, transaction.toString());
+  }
+
+  @Test
+  public void getsChaincodeName() {
+    assertEquals(chaincodeName, transaction.getChaincodeName());
+  }
+
+  @Test
+  public void getsCreatedTimestamp() {
+    assertEquals(createdTimestamp, transaction.getCreatedTimestamp());
   }
 }
