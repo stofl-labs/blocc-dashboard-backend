@@ -28,6 +28,7 @@ public class ForkStatusControllerTest {
     when(service.getForkStatus(containerNum)).thenReturn(true);
 
     mockMvc.perform(get("/api/v1/forkStatus")
+            .header("Origin", "http://localhost:3000")
             .param("containerNum", String.valueOf(containerNum)))
         .andExpect(status().isOk())
         .andExpect(content().string("true"));
@@ -39,6 +40,7 @@ public class ForkStatusControllerTest {
     when(service.getForkStatus(containerNum)).thenReturn(false);
 
     mockMvc.perform(get("/api/v1/forkStatus")
+            .header("Origin", "http://localhost:4000")
             .param("containerNum", String.valueOf(containerNum)))
         .andExpect(status().isOk())
         .andExpect(content().string("false"));
@@ -51,6 +53,7 @@ public class ForkStatusControllerTest {
         new IllegalArgumentException("Entity not found"));
 
     mockMvc.perform(get("/api/v1/forkStatus")
+            .header("Origin", "https://example.com:8000")
             .param("containerNum", String.valueOf(containerNum)))
         .andExpect(status().isNotFound());
   }

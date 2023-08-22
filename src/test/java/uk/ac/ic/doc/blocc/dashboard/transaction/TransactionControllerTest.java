@@ -39,6 +39,7 @@ class TransactionControllerTest {
     when(transactionService.getApprovedTempReadings(containerNum)).thenReturn(mockData);
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/approvedTempReadings")
+            .header("Origin", "http://localhost:3000")
             .param("containerNum", String.valueOf(containerNum)))
         .andExpect(status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(2));
@@ -52,6 +53,7 @@ class TransactionControllerTest {
     when(transactionService.getApprovedTempReadings(containerNum)).thenReturn(mockData);
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/approvedTempReadings")
+            .header("Origin", "http://localhost:4000")
             .param("containerNum", String.valueOf(containerNum)))
         .andExpect(status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(0));
@@ -93,6 +95,7 @@ class TransactionControllerTest {
     when(transactionService.getTransactions(containerNum)).thenReturn(transactions);
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/all")
+            .header("Origin", "https://example.com:8080")
             .param("containerNum", String.valueOf(containerNum)))
         .andExpect(status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(5));
