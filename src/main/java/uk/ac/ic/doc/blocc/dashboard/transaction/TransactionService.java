@@ -97,4 +97,8 @@ public class TransactionService {
   public List<Transaction> getTransactions(int containerNum) {
     return transactionRepository.findAllByContainerNum(containerNum);
   }
+
+  public List<Transaction> getTransactions() {
+    return transactionRepository.findAll();
+  }
 }

@@ -100,4 +100,43 @@ class TransactionControllerTest {
         .andExpect(status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(5));
   }
+
+  @Test
+  public void getAllExistingTransactions() throws Exception {
+    // Given
+    SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
+        "tx123",
+        1,
+        "Container5MSP",
+        100L,
+        new TemperatureHumidityReading(25, 0.3F, 100L));
+
+    SensorChaincodeTransaction tx2 = new SensorChaincodeTransaction(
+        "tx456",
+        2,
+        "Container5MSP",
+        103L,
+        new TemperatureHumidityReading(30, 0.2F, 103L));
+
+    SensorChaincodeTransaction tx3 = new SensorChaincodeTransaction(
+        "tx1299",
+        3,
+        "Container5MSP",
+        100L,
+        new TemperatureHumidityReading(22, 0.3F, 100L));
+
+    ApprovalTransaction approval1 = new ApprovalTransaction(
+        "app1", 1, "Container6MSP", 101L, tx1);
+    ApprovalTransaction approval2 = new ApprovalTransaction(
+        "app2", 2, "Container7MSP", 102L, tx1);
+
+    List<Transaction> transactions = List.of(tx1, tx2, tx3, approval1, approval2);
+
+    when(transactionService.getTransactions()).thenReturn(transactions);
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/all")
+            .header("Origin", "https://example.com:8080"))
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(5));
+  }
 }

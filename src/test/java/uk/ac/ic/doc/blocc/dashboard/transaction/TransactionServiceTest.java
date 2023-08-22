@@ -190,7 +190,7 @@ public class TransactionServiceTest {
   }
 
   @Test
-  public void getsTransactions() {
+  public void getsTransactionsByContainerNum() {
     int containerNum = 1;
 
     SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
@@ -224,6 +224,50 @@ public class TransactionServiceTest {
     // Assertions
     assertTrue(result.contains(tx1));
     assertTrue(result.contains(tx2));
+    assertTrue(result.contains(approval1));
+    assertTrue(result.contains(approval2));
+  }
+
+  @Test
+  public void getsTransactionsReturnsALlExistingTransactions() {
+
+    SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
+        "tx123",
+        1, "creator", 100L,
+        new TemperatureHumidityReading(25, 0.3F, 100L));
+    SensorChaincodeTransaction tx2 = new SensorChaincodeTransaction(
+        "tx1299",
+        2, "creator", 100L,
+        new TemperatureHumidityReading(22, 0.3F, 100L));
+    SensorChaincodeTransaction tx3 = new SensorChaincodeTransaction(
+        "tx123",
+        3, "creator", 100L,
+        new TemperatureHumidityReading(25, 0.3F, 100L));
+    ApprovalTransaction approval1 = new ApprovalTransaction(
+        "tx222",
+        1, "approvingMSP", 101L, tx1);
+    ApprovalTransaction approval2 = new ApprovalTransaction(
+        "tx223",
+        2, "approvingMSP", 101L, tx2);
+
+    List<Transaction> mockData = Arrays.asList(
+        tx1,
+        tx2,
+        tx3,
+        approval1,
+        approval2
+    );
+
+    when(transactionRepository.findAll()).thenReturn(mockData);
+
+    List<Transaction> result = transactionService.getTransactions();
+
+    assertEquals(5, result.size());
+
+    // Assertions
+    assertTrue(result.contains(tx1));
+    assertTrue(result.contains(tx2));
+    assertTrue(result.contains(tx3));
     assertTrue(result.contains(approval1));
     assertTrue(result.contains(approval2));
   }

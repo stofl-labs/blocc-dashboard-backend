@@ -28,7 +28,10 @@ public class TransactionController {
   }
 
   @GetMapping("/all")
-  public List<Transaction> getTransactions(@RequestParam int containerNum) {
+  public List<Transaction> getTransactions(@RequestParam(required = false) Integer containerNum) {
+    if (containerNum == null) {
+      return transactionService.getTransactions();
+    }
     return transactionService.getTransactions(containerNum);
   }
 
