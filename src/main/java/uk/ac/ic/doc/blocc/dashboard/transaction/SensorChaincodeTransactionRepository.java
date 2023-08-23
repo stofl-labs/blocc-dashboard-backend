@@ -11,6 +11,6 @@ import uk.ac.ic.doc.blocc.dashboard.transaction.model.CompositeKey;
 public interface SensorChaincodeTransactionRepository
     extends JpaRepository<SensorChaincodeTransaction, CompositeKey> {
 
-  @Query("SELECT tx FROM SensorChaincodeTransaction tx WHERE tx.key.containerNum = ?1")
+  @Query("SELECT tx FROM SensorChaincodeTransaction tx WHERE tx.key.containerNum = ?1 ORDER BY tx.reading.timestamp")
   List<SensorChaincodeTransaction> findAllByContainerNum(int containerNum);
 }

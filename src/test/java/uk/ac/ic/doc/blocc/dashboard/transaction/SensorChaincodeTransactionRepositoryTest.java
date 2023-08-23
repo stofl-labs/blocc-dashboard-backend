@@ -40,21 +40,21 @@ public class SensorChaincodeTransactionRepositoryTest {
   private SensorChaincodeTransactionRepository repository;
 
   @Test
-  public void testFindAllByContainerNum() {
+  public void findAllByContainerNumReturnsInOrderOfReadingTimestamp() {
     // Given
     SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
         "tx123",
         1,
         "Container5MSP",
         100L,
-        new TemperatureHumidityReading(25, 0.3F, 100L));
+        new TemperatureHumidityReading(25, 0.3F, 105L));
 
     SensorChaincodeTransaction tx2 = new SensorChaincodeTransaction(
         "tx456",
         3,
         "Container5MSP",
         103L,
-        new TemperatureHumidityReading(30, 0.2F, 103L));
+        new TemperatureHumidityReading(30, 0.2F, 110L));
 
     SensorChaincodeTransaction tx3 = new SensorChaincodeTransaction(
         "tx1299",
@@ -62,6 +62,20 @@ public class SensorChaincodeTransactionRepositoryTest {
         "Container5MSP",
         100L,
         new TemperatureHumidityReading(22, 0.3F, 100L));
+
+    SensorChaincodeTransaction tx4 = new SensorChaincodeTransaction(
+        "tx789",
+        1,
+        "Container5MSP",
+        101L,
+        new TemperatureHumidityReading(28, 0.25F, 102L));
+
+    SensorChaincodeTransaction tx5 = new SensorChaincodeTransaction(
+        "tx900",
+        1,
+        "Container5MSP",
+        102L,
+        new TemperatureHumidityReading(29, 0.26F, 108L));
 
     ApprovalTransaction approval1 = new ApprovalTransaction(
         "app1", 1, "Container6MSP", 101L, tx1);
@@ -71,6 +85,8 @@ public class SensorChaincodeTransactionRepositoryTest {
     entityManager.persist(tx1);
     entityManager.persist(tx2);
     entityManager.persist(tx3);
+    entityManager.persist(tx4);
+    entityManager.persist(tx5);
     entityManager.persist(approval1);
     entityManager.persist(approval2);
     entityManager.flush();
@@ -79,7 +95,7 @@ public class SensorChaincodeTransactionRepositoryTest {
     List<SensorChaincodeTransaction> found = repository.findAllByContainerNum(1);
 
     // Then
-    assertThat(found).hasSize(2).contains(tx1, tx3);
+    assertThat(found).hasSize(4).containsExactly(tx3, tx4, tx1, tx5);
     assertThat(found).doesNotContain(tx2);
   }
 
