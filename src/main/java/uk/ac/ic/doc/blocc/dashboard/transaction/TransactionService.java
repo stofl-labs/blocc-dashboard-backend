@@ -41,11 +41,7 @@ public class TransactionService {
     List<SensorChaincodeTransaction> allSensorChaincodeTransactions =
         sensorChaincodeTransactionRepository.findAllByContainerNum(containerNum);
 
-    return allSensorChaincodeTransactions.stream().map(
-        tx -> new ApprovedTempReading(tx.getReading().getTimestamp(),
-            tx.getReading().getTemperature(),
-            tx.getApprovalCount(),
-            tx.getTxId())).toList();
+    return convertToApprovedTempReadings(allSensorChaincodeTransactions);
 
   }
 
@@ -103,5 +99,23 @@ public class TransactionService {
 
   public List<Transaction> getTransactions() {
     return transactionRepository.findAll();
+  }
+
+  public List<ApprovedTempReading> getApprovedTempReadingsSince(int containerNum,
+      Long sinceTimestamp) {
+    List<SensorChaincodeTransaction> allSensorChaincodeTransactions =
+        sensorChaincodeTransactionRepository.findAllSinceTimestampByContainerNum(containerNum,
+            sinceTimestamp);
+
+    return convertToApprovedTempReadings(allSensorChaincodeTransactions);
+  }
+
+  private static List<ApprovedTempReading> convertToApprovedTempReadings(
+      List<SensorChaincodeTransaction> sensorChaincodeTransactions) {
+    return sensorChaincodeTransactions.stream().map(
+        tx -> new ApprovedTempReading(tx.getReading().getTimestamp(),
+            tx.getReading().getTemperature(),
+            tx.getApprovalCount(),
+            tx.getTxId())).toList();
   }
 }

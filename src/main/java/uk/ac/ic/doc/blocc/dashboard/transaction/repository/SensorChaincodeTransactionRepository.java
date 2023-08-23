@@ -13,4 +13,8 @@ public interface SensorChaincodeTransactionRepository
 
   @Query("SELECT tx FROM SensorChaincodeTransaction tx WHERE tx.key.containerNum = ?1 ORDER BY tx.reading.timestamp")
   List<SensorChaincodeTransaction> findAllByContainerNum(int containerNum);
+
+  @Query("SELECT tx FROM SensorChaincodeTransaction tx WHERE tx.key.containerNum = ?1 AND tx.createdTimestamp >= ?2 ORDER BY tx.reading.timestamp")
+  List<SensorChaincodeTransaction> findAllSinceTimestampByContainerNum(int containerNum,
+      Long sinceTimestamp);
 }

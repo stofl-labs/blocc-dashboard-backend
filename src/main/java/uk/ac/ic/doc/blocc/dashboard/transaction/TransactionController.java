@@ -23,7 +23,11 @@ public class TransactionController {
   }
 
   @GetMapping("/approvedTempReadings")
-  public List<ApprovedTempReading> getApprovedTransactions(@RequestParam int containerNum) {
+  public List<ApprovedTempReading> getApprovedTransactions(@RequestParam int containerNum,
+      @RequestParam(required = false) Long sinceTimestamp) {
+    if (sinceTimestamp != null) {
+      return transactionService.getApprovedTempReadingsSince(containerNum, sinceTimestamp);
+    }
     return transactionService.getApprovedTempReadings(containerNum);
   }
 

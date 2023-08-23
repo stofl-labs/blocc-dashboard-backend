@@ -99,4 +99,58 @@ public class SensorChaincodeTransactionRepositoryTest {
     assertThat(found).doesNotContain(tx2);
   }
 
+  @Test
+  public void findAllSinceTimestampByContainerNumReturnsInOrderOfReadingTimestamp() {
+    // Given
+    SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
+        "tx123",
+        1,
+        "Container5MSP",
+        100L,
+        new TemperatureHumidityReading(25, 0.3F, 105L));
+
+    SensorChaincodeTransaction tx2 = new SensorChaincodeTransaction(
+        "tx456",
+        1,
+        "Container5MSP",
+        108L,
+        new TemperatureHumidityReading(30, 0.2F, 110L));
+
+    SensorChaincodeTransaction tx3 = new SensorChaincodeTransaction(
+        "tx1299",
+        1,
+        "Container5MSP",
+        99L,
+        new TemperatureHumidityReading(22, 0.3F, 100L));
+
+    SensorChaincodeTransaction tx4 = new SensorChaincodeTransaction(
+        "tx789",
+        1,
+        "Container5MSP",
+        104L,
+        new TemperatureHumidityReading(28, 0.25F, 107L));
+
+    SensorChaincodeTransaction tx5 = new SensorChaincodeTransaction(
+        "tx7890",
+        1,
+        "Container5MSP",
+        104L,
+        new TemperatureHumidityReading(28, 0.25F, 102L));
+
+    entityManager.persist(tx1);
+    entityManager.persist(tx2);
+    entityManager.persist(tx3);
+    entityManager.persist(tx4);
+    entityManager.persist(tx5);
+    entityManager.flush();
+
+    // When
+    List<SensorChaincodeTransaction> found = repository.findAllSinceTimestampByContainerNum(1,
+        102L);
+
+    // Then
+    assertThat(found).hasSize(3).containsExactly(tx5, tx4, tx2);
+  }
+
+
 }

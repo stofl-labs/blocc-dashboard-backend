@@ -275,4 +275,38 @@ public class TransactionServiceTest {
     assertTrue(result.contains(approval2));
   }
 
+  @Test
+  public void getsApprovedTempReadingsSinceTimestamp() {
+    int containerNum = 1;
+    long sinceTimestamp = 101L;
+
+    // Sample data from repository
+    List<SensorChaincodeTransaction> mockSensorTransactions = Arrays.asList(
+        new SensorChaincodeTransaction("tx124", 1, "creator", 102L,
+            new TemperatureHumidityReading(25, 0.3F, 102L)),
+        new SensorChaincodeTransaction("tx1300", 1, "creator", 103L,
+            new TemperatureHumidityReading(22, 0.3F, 103L))
+    );
+
+    // Mocking the repository call
+    when(sensorChaincodeTransactionRepository.findAllSinceTimestampByContainerNum(containerNum,
+        sinceTimestamp))
+        .thenReturn(mockSensorTransactions);
+
+    // Expected data after conversion
+    List<ApprovedTempReading> expectedReadings = Arrays.asList(
+        new ApprovedTempReading(102L, 25, 0, "tx124"),
+        new ApprovedTempReading(103L, 22, 0, "tx1300")
+    );
+
+    // Invoking the service method
+    List<ApprovedTempReading> result = transactionService.getApprovedTempReadingsSince(containerNum,
+        sinceTimestamp);
+
+    // Assertions
+    assertEquals(expectedReadings.size(), result.size());
+    assertTrue(result.containsAll(expectedReadings));
+  }
+
+
 }

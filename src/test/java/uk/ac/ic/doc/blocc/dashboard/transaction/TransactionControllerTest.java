@@ -139,4 +139,25 @@ class TransactionControllerTest {
         .andExpect(status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(5));
   }
+
+  @Test
+  public void getApprovedTransactionsSinceSpecificTimestamp() throws Exception {
+    int containerNum = 1;
+    long sinceTimestamp = 101L; // Example timestamp
+    List<ApprovedTempReading> mockData = Arrays.asList(
+        new ApprovedTempReading(102L, 0.5F, 3, "tx123"),
+        new ApprovedTempReading(103L, 20F, 2, "tx456")
+    );
+
+    // Mocking the new method you might have added to your service
+    when(transactionService.getApprovedTempReadingsSince(containerNum, sinceTimestamp)).thenReturn(
+        mockData);
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/approvedTempReadings")
+            .header("Origin", "http://localhost:3000")
+            .param("containerNum", String.valueOf(containerNum))
+            .param("sinceTimestamp", String.valueOf(sinceTimestamp)))
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(2));
+  }
 }
