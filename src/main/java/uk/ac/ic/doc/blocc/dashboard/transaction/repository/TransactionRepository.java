@@ -1,4 +1,4 @@
-package uk.ac.ic.doc.blocc.dashboard.transaction;
+package uk.ac.ic.doc.blocc.dashboard.transaction.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

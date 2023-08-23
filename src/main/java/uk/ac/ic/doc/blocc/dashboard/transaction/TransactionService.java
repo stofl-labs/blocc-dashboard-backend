@@ -13,6 +13,9 @@ import uk.ac.ic.doc.blocc.dashboard.transaction.model.SensorChaincodeTransaction
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.CompositeKey;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.Transaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.repository.ApprovalTransactionRepository;
+import uk.ac.ic.doc.blocc.dashboard.transaction.repository.SensorChaincodeTransactionRepository;
+import uk.ac.ic.doc.blocc.dashboard.transaction.repository.TransactionRepository;
 
 @Service
 public class TransactionService {

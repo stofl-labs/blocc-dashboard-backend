@@ -15,6 +15,7 @@ import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovalTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.SensorChaincodeTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.Transaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.repository.TransactionRepository;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
