@@ -14,6 +14,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovalTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.SensorChaincodeTransaction;
+import uk.ac.ic.doc.blocc.dashboard.transaction.specification.SensorChaincodeTransactionSpecification;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -152,5 +153,43 @@ public class SensorChaincodeTransactionRepositoryTest {
     assertThat(found).hasSize(3).containsExactly(tx5, tx4, tx2);
   }
 
+  @Test
+  public void findAllFilteredByParametersOrderedByCreatedTimestamp() {
+    SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
+        "tx123",
+        1,
+        "Container5MSP",
+        95L,
+        new TemperatureHumidityReading(28, 0.25F, 102L)
+    );
 
+    SensorChaincodeTransaction tx2 = new SensorChaincodeTransaction(
+        "tx456",
+        1,
+        "Container5MSP",
+        100L,
+        new TemperatureHumidityReading(28, 0.25F, 102L)
+    );
+
+    SensorChaincodeTransaction tx3 = new SensorChaincodeTransaction(
+        "tx789",
+        1,
+        "Container5MSP",
+        105L,
+        new TemperatureHumidityReading(28, 0.25F, 102L)
+    );
+
+    entityManager.persist(tx1);
+    entityManager.persist(tx2);
+    entityManager.persist(tx3);
+    entityManager.flush();
+
+    List<SensorChaincodeTransaction> transactions = repository.findAll(
+        SensorChaincodeTransactionSpecification.filterByParameters(1, null, null)
+    );
+
+    assertThat(transactions).hasSize(3);
+    // Check the order based on createdTimestamp
+    assertThat(transactions).containsExactly(tx1, tx2, tx3);
+  }
 }

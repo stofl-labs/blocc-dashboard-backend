@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
+import uk.ac.ic.doc.blocc.dashboard.transaction.model.SensorChaincodeTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.Transaction;
 
 @RestController
@@ -37,6 +38,16 @@ public class TransactionController {
       return transactionService.getTransactions();
     }
     return transactionService.getTransactions(containerNum);
+  }
+
+  @GetMapping("/sensorChaincodeTransactions")
+  public List<SensorChaincodeTransaction> getSensorChaincodeTransactions(
+      @RequestParam(required = false) Integer containerNum,
+      @RequestParam(required = false) Long sinceTimestamp,
+      @RequestParam(required = false) Long untilTimestamp,
+      @RequestParam(required = false) Long approvalWindowSeconds) {
+    return transactionService.getSensorChaincodeTransactions(containerNum, sinceTimestamp,
+        untilTimestamp, approvalWindowSeconds);
   }
 
 }

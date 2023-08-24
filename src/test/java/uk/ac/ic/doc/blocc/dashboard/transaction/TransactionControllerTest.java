@@ -160,4 +160,83 @@ class TransactionControllerTest {
         .andExpect(status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(2));
   }
+
+  // Inside TransactionControllerTest class
+
+  @Test
+  public void getSensorChaincodeTransactionsWithoutParameters() throws Exception {
+    List<SensorChaincodeTransaction> mockData = Arrays.asList(
+        new SensorChaincodeTransaction("tx123", 1, "Container1MSP", 100L,
+            new TemperatureHumidityReading(25, 0.3F, 105L)),
+        new SensorChaincodeTransaction("tx456", 2, "Container2MSP", 110L,
+            new TemperatureHumidityReading(26, 0.4F, 115L))
+    );
+
+    when(transactionService.getSensorChaincodeTransactions(null, null, null, null)).thenReturn(
+        mockData);
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/sensorChaincodeTransactions"))
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(mockData.size()));
+  }
+
+  @Test
+  public void getSensorChaincodeTransactionsWithContainerNum() throws Exception {
+    int containerNum = 1;
+    List<SensorChaincodeTransaction> mockData = List.of(
+        new SensorChaincodeTransaction("tx123", 1, "Container1MSP", 100L,
+            new TemperatureHumidityReading(25, 0.3F, 105L))
+    );
+
+    when(transactionService.getSensorChaincodeTransactions(containerNum, null, null,
+        null)).thenReturn(mockData);
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/sensorChaincodeTransactions")
+            .param("containerNum", String.valueOf(containerNum)))
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(mockData.size()));
+  }
+
+  @Test
+  public void getSensorChaincodeTransactionsWithContainerNumAndSinceTimestamp() throws Exception {
+    int containerNum = 1;
+    long sinceTimestamp = 100L;
+    List<SensorChaincodeTransaction> mockData = List.of(
+        new SensorChaincodeTransaction("tx123", 1, "Container1MSP", 100L,
+            new TemperatureHumidityReading(25, 0.3F, 105L))
+    );
+
+    when(transactionService.getSensorChaincodeTransactions(containerNum, sinceTimestamp, null,
+        null)).thenReturn(mockData);
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/sensorChaincodeTransactions")
+            .param("containerNum", String.valueOf(containerNum))
+            .param("sinceTimestamp", String.valueOf(sinceTimestamp)))
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(mockData.size()));
+  }
+
+  @Test
+  public void getSensorChaincodeTransactionsWithAllParameters() throws Exception {
+    int containerNum = 1;
+    long sinceTimestamp = 90L;
+    long untilTimestamp = 120L;
+    long approvalWindowSeconds = 50L;
+    List<SensorChaincodeTransaction> mockData = List.of(
+        new SensorChaincodeTransaction("tx123", 1, "Container1MSP", 100L,
+            new TemperatureHumidityReading(25, 0.3F, 105L))
+    );
+
+    when(transactionService.getSensorChaincodeTransactions(containerNum, sinceTimestamp,
+        untilTimestamp, approvalWindowSeconds)).thenReturn(mockData);
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/transaction/sensorChaincodeTransactions")
+            .param("containerNum", String.valueOf(containerNum))
+            .param("sinceTimestamp", String.valueOf(sinceTimestamp))
+            .param("untilTimestamp", String.valueOf(untilTimestamp))
+            .param("approvalWindowSeconds", String.valueOf(approvalWindowSeconds)))
+        .andExpect(status().isOk())
+        .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(mockData.size()));
+  }
+
 }

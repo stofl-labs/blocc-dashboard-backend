@@ -45,4 +45,12 @@ public class SensorChaincodeTransaction extends Transaction {
     return approvals.size();
   }
 
+  @JsonIgnore
+  public List<ApprovalTransaction> getApprovals() {
+    return approvals;
+  }
+
+  public void setApprovals(List<ApprovalTransaction> approvals) {
+    this.approvals = approvals;
+  }
 }

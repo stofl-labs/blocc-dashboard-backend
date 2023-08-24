@@ -1,11 +1,14 @@
 package uk.ac.ic.doc.blocc.dashboard.transaction;
 
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovalTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
@@ -16,6 +19,7 @@ import uk.ac.ic.doc.blocc.dashboard.transaction.model.Transaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.repository.ApprovalTransactionRepository;
 import uk.ac.ic.doc.blocc.dashboard.transaction.repository.SensorChaincodeTransactionRepository;
 import uk.ac.ic.doc.blocc.dashboard.transaction.repository.TransactionRepository;
+import uk.ac.ic.doc.blocc.dashboard.transaction.specification.SensorChaincodeTransactionSpecification;
 
 @Service
 public class TransactionService {
@@ -117,5 +121,40 @@ public class TransactionService {
             tx.getReading().getTemperature(),
             tx.getApprovalCount(),
             tx.getTxId())).toList();
+  }
+
+  public List<SensorChaincodeTransaction> getSensorChaincodeTransactions(Integer containerNum,
+      Long sinceTimestamp,
+      Long untilTimestamp, Long approvalWindowSeconds) {
+    Specification<SensorChaincodeTransaction> specification =
+        SensorChaincodeTransactionSpecification.filterByParameters(
+            containerNum, sinceTimestamp,
+            untilTimestamp);
+
+    List<SensorChaincodeTransaction> filteredSensorChaincodeTransactions = sensorChaincodeTransactionRepository.findAll(
+        specification);
+
+    if (approvalWindowSeconds == null) {
+      return filteredSensorChaincodeTransactions;
+    }
+
+    List<SensorChaincodeTransaction> result = new ArrayList<>();
+
+    for (SensorChaincodeTransaction transaction : filteredSensorChaincodeTransactions) {
+      List<ApprovalTransaction> validApprovals = transaction.getApprovals().stream()
+          .filter(approval -> isWithinWindow(transaction.getCreatedTimestamp(),
+              approval.getCreatedTimestamp(), approvalWindowSeconds))
+          .collect(Collectors.toList());
+
+      transaction.setApprovals(validApprovals);
+      result.add(transaction);
+    }
+
+    return result;
+  }
+
+
+  private boolean isWithinWindow(Long transactionTimestamp, Long approvalTimestamp, Long window) {
+    return (approvalTimestamp - transactionTimestamp) <= window;
   }
 }

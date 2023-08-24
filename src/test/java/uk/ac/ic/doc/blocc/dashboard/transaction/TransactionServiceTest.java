@@ -3,6 +3,7 @@ package uk.ac.ic.doc.blocc.dashboard.transaction;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.jpa.domain.Specification;
 import uk.ac.ic.doc.blocc.dashboard.fabric.model.TemperatureHumidityReading;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovalTransaction;
 import uk.ac.ic.doc.blocc.dashboard.transaction.model.ApprovedTempReading;
@@ -306,6 +308,67 @@ public class TransactionServiceTest {
     // Assertions
     assertEquals(expectedReadings.size(), result.size());
     assertTrue(result.containsAll(expectedReadings));
+  }
+
+  @Test
+  public void getsSensorChaincodeTransactionsFiltersApprovalsByWindow() {
+    // Given
+    SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
+        "tx123", 1, "Container5MSP", 100L, new TemperatureHumidityReading(25, 0.3F, 105L));
+    SensorChaincodeTransaction tx2 = new SensorChaincodeTransaction(
+        "tx456", 1, "Container5MSP", 103L, new TemperatureHumidityReading(30, 0.2F, 110L));
+
+    ApprovalTransaction approval1 = new ApprovalTransaction("app1", 1, "Container6MSP", 102L, tx1);
+    ApprovalTransaction approval2 = new ApprovalTransaction("app2", 1, "Container7MSP", 108L,
+        tx1); // this will be filtered out
+    tx1.setApprovals(Arrays.asList(approval1, approval2));
+
+    when(sensorChaincodeTransactionRepository.findAll(anySensorTransactionSpecification()))
+        .thenReturn(Arrays.asList(tx1, tx2));
+
+    // When
+    List<SensorChaincodeTransaction> transactions = transactionService.getSensorChaincodeTransactions(
+        1, 100L, 110L, 3L);
+
+    // Then
+    assertEquals(2, transactions.size());
+    SensorChaincodeTransaction fetchedTx1 = transactions.get(0);
+    assertEquals(1, fetchedTx1.getApprovals().size());
+    assertEquals(approval1, fetchedTx1.getApprovals().get(0));
+  }
+
+  @Test
+  public void getsSensorChaincodeTransactionsFiltersApprovalsWithoutWindow() {
+    SensorChaincodeTransaction tx1 = new SensorChaincodeTransaction(
+        "tx123", 1, "Container5MSP", 100L, null
+    );
+
+    ApprovalTransaction approval1 = new ApprovalTransaction(
+        "app1", 1, "Container6MSP", 101L, tx1
+    );
+
+    ApprovalTransaction approval2 = new ApprovalTransaction(
+        "app2", 1, "Container7MSP", 105L, tx1
+    );
+
+    tx1.setApprovals(Arrays.asList(approval1, approval2));
+
+    when(sensorChaincodeTransactionRepository.findAll(anySensorTransactionSpecification()))
+        .thenReturn(List.of(tx1));
+
+    // The actual call
+    List<SensorChaincodeTransaction> result = transactionService.getSensorChaincodeTransactions(1,
+        null, null, null);
+
+    // Verifying that the tx1 was returned with both its approvals
+    assertEquals(1, result.size());
+    assertEquals(tx1.getTxId(), result.get(0).getTxId());
+    assertEquals(2, result.get(0).getApprovals().size());
+  }
+
+
+  private Specification<SensorChaincodeTransaction> anySensorTransactionSpecification() {
+    return any();
   }
 
 
